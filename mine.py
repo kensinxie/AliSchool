@@ -11,7 +11,7 @@ incomePerHour = {"ecs.c1.large": 0.39, "ecs.c1.xlarge": 0.78, "ecs.c1.2xlarge": 
                  "ecs.g1.xlarge": 1, "ecs.g1.2xlarge": 2, "ecs.r1.large": 0.66, "ecs.r1.xlarge": 1.33,
                  "ecs.r1.2xlarge": 2.65}
 
-#nc类
+
 class NC(object):
     def __init__(self, ncID, machineType, state, maxCpu, maxMemory, price, supportProductType, freeCpu, freeMemory,
                  inVm, createTime):
@@ -20,16 +20,17 @@ class NC(object):
         self.state, self.maxCpu, self.maxMemory, self.price, self.supportProductType, self.freeCpu, self.freeMemory, self.inVm = state, maxCpu, maxMemory, price, supportProductType, freeCpu, freeMemory, inVm
         self.createTime = createTime
 
+
 def getVmCpu_Mem_Income(vmType):
     return vmCpu[vmType], vmMemory[vmType], incomePerHour[vmType]
 
-#vm类
+
 class Vm(object):
     def __init__(self, vmId, vmType, createTime, releaseTime):
         self.vmId, self.vmType, self.createTime, self.releaseTime = vmId, vmType, createTime, releaseTime
         self.vmCpu, self.vmMemory, self.incomePerHour = getVmCpu_Mem_Income(vmType)
 
-#生成nc的id
+
 ncIndex = 0
 
 # 服务器集群
@@ -60,7 +61,7 @@ def applyNc(ncType, n, freeDay):
             Nt18 = NC(ncId, 'NT-1-8', 'free', 104, 516, 30000, ['r1'], 104, 516, [], freeDay)
             r1_NC.append(Nt18)
 
-#判断是否有足够资源来创建VM
+
 def ifEnoughSourece(vmtype, today):
     s = vmtype.split('.')
     jiqun = s[1] + '_NC'
@@ -98,6 +99,11 @@ if __name__ == '__main__':
     for i in range(2, 21, 1):
         data = pd.read_csv(path + 'input_vm_' + str(i) + '.csv')
         allData = allData.append(data)
+    allData = allData.reset_index(drop=True)
+    fristday=allData.loc[0, "createtime"]
+    lastday = allData.loc[allData.shape[0] - 1, "createtime"]
+    begin=datetime.date(datetime.strptime(fristday, '%Y-%m-%d'))
+    end = datetime.date(datetime.strptime(lastday, '%Y-%m-%d'))
 
     zongshouyi = 0
 
@@ -109,9 +115,10 @@ if __name__ == '__main__':
 
     vmId = 0  # vmid序号
 
-    #控制 日期
-    begin = DateTime.date(2019, 1, 1)
-    end = DateTime.date(2019, 3, 28)
+    #begin = DateTime.date(2019, 4, 1)
+    # end = DateTime.date(2019, 6, 30)
+    duringDays = (end - begin).days
+
     shouyidata = pd.DataFrame(
         columns=["Date", "income", "duangongsunshi", "weihufei", "baobeiNC"])
 
@@ -191,11 +198,11 @@ if __name__ == '__main__':
         Nc_12_freeMemo = Nc_12['totalMemory'].sum() - Nc_12['usedMemory'].sum()
         nc12 = 0
         if Nc_12_freeMemo < 640:
-            nc12 = 5
+            nc12 = 10
             if Nc_12_freeMemo < 320:
-                nc12 = 10
+                nc12 = 15
                 if Nc_12_freeMemo < 160:
-                    nc12 = 15
+                    nc12 = 20
         applyNc('NT-1-2', nc12, str(day + DateTime.timedelta(days=10)))
         baobeiNc = baobeiNc - (20000 + 16) * nc12
         for j in range(ncIndex - 1, ncIndex - 1 - nc12, -1):  # 为了处理报备机器的ID号
@@ -209,11 +216,11 @@ if __name__ == '__main__':
         Nc_14_freeMemo = Nc_14['totalMemory'].sum() - Nc_14['usedMemory'].sum()
         nc14 = 0
         if Nc_14_freeMemo < 1280:
-            nc14 = 10
+            nc14 = 30
             if Nc_14_freeMemo < 640:
-                nc14 = 20
+                nc14 = 40
                 if Nc_14_freeMemo < 320:
-                    nc14 = 30
+                    nc14 = 50
         applyNc('NT-1-4', nc14, str(day + DateTime.timedelta(days=10)))
         baobeiNc = baobeiNc - (23500 + 16) * nc14
         for j in range(ncIndex - 1, ncIndex - 1 - nc14, -1):
@@ -314,4 +321,6 @@ if __name__ == '__main__':
                                          'heji': income - duangong - totalCpu * 3.6 + baobeiNc}], ignore_index=True,
                                        sort=False)
     shouyidata.to_csv("每日明细.csv", index=False)
-    print(zongshouyi)
+
+    print()
+    print("总收益：" + zongshouyi + "\t平均收益率：" + zongshouyi / duringDays)
