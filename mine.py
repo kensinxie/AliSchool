@@ -11,7 +11,7 @@ incomePerHour = {"ecs.c1.large": 0.39, "ecs.c1.xlarge": 0.78, "ecs.c1.2xlarge": 
                  "ecs.g1.xlarge": 1, "ecs.g1.2xlarge": 2, "ecs.r1.large": 0.66, "ecs.r1.xlarge": 1.33,
                  "ecs.r1.2xlarge": 2.65}
 
-
+#NC类
 class NC(object):
     def __init__(self, ncID, machineType, state, maxCpu, maxMemory, price, supportProductType, freeCpu, freeMemory,
                  inVm, createTime):
@@ -24,13 +24,13 @@ class NC(object):
 def getVmCpu_Mem_Income(vmType):
     return vmCpu[vmType], vmMemory[vmType], incomePerHour[vmType]
 
-
+#Vm类
 class Vm(object):
     def __init__(self, vmId, vmType, createTime, releaseTime):
         self.vmId, self.vmType, self.createTime, self.releaseTime = vmId, vmType, createTime, releaseTime
         self.vmCpu, self.vmMemory, self.incomePerHour = getVmCpu_Mem_Income(vmType)
 
-
+#控制新建Nc的编号
 ncIndex = 0
 
 # 服务器集群
@@ -61,7 +61,7 @@ def applyNc(ncType, n, freeDay):
             Nt18 = NC(ncId, 'NT-1-8', 'free', 104, 516, 30000, ['r1'], 104, 516, [], freeDay)
             r1_NC.append(Nt18)
 
-
+#判断资源是否足够
 def ifEnoughSourece(vmtype, today):
     s = vmtype.split('.')
     jiqun = s[1] + '_NC'
@@ -115,8 +115,6 @@ if __name__ == '__main__':
 
     vmId = 0  # vmid序号
 
-    #begin = DateTime.date(2019, 4, 1)
-    # end = DateTime.date(2019, 6, 30)
     duringDays = (end - begin).days
 
     shouyidata = pd.DataFrame(
