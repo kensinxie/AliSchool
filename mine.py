@@ -312,10 +312,10 @@ if __name__ == '__main__':
                 del vmList[k]
 
         vmdata.to_csv("vm" + outputDate + ".csv", index=False)
-        # baobeiNc=income-duangong-totalCpu*3.6
+
         print(str(day) + "\t断供损失:" + str(duangong) + "\t今日收入:" + str(income) + "\t维护费用:" + str(
             totalCpu * 3.6) + "\t合计:" + str(income - duangong - totalCpu * 3.6 + baobeiNc))
-        zongshouyi = zongshouyi + baobeiNc
+        zongshouyi = zongshouyi +income+ baobeiNc-duangong-totalCpu*3.6
         shouyidata = shouyidata.append([{'Date': outputDate, 'income': income, 'duangongsunshi': duangong,
                                          'weihufei': totalCpu * 3.6, 'baobeiNC': baobeiNc,
                                          'heji': income - duangong - totalCpu * 3.6 + baobeiNc}], ignore_index=True,
@@ -323,4 +323,4 @@ if __name__ == '__main__':
     shouyidata.to_csv("每日明细.csv", index=False)
 
     print()
-    print("总收益：" + zongshouyi + "\t平均收益率：" + zongshouyi / duringDays)
+    print("总收益：" + str(zongshouyi) + "\t平均收益率：" + str(zongshouyi / duringDays))
